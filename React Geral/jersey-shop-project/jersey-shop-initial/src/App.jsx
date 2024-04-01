@@ -1,7 +1,10 @@
 import "./App.css";
+import OrderDetails from "./components/OrderDetails";
+import Item from "./components/Item"; // Import the 'Item' component
+import { useState } from "react";
 
 function App() {
-  const items = [
+  const [items, setItems] = useState([
     {
       id: 1,
       photo: "real_madrid.webp",
@@ -83,54 +86,39 @@ function App() {
       quantity: 1,
       isInBag: false,
     },
-  ];
+  ]);
 
   const shopName = " Jersey Shop Made with React JS";
+  const itemsInBag = items.filter((item) => item.isInBag);
+
+  function selectHandler(id) {
+    let item = items.filter((item) => item.id === id)[0];
+    item.isInBag = !item.isInBag;
+    setItems(items.map((elemento) => (elemento.id === id ? item : elemento)));
+  }
+
+  function quantityHandler(e, id, value) {
+    e.stopPropagation();
+    let item = items.filter((item) => item.id === id)[0];
+    item.quantity += value;
+    setItems(items.map((elemento) => (elemento.id === id ? item : elemento)));
+  }
+
   return (
     <>
       <section className="items">
         <h4>{shopName}</h4>
 
         {items.map((item) => (
-          <div className="product" key={item.id}>
-            <div className="photo">
-              <img src={"./img/" + item.photo} />
-            </div>
-            <div className="description">
-              <span className="name">{item.name}</span>
-              <span className="price">{item.price}</span>
-              <div className="quantity-area">
-                <button>-</button>
-                <span className="quantity">{item.quantity}</span>
-                <button>+</button>
-              </div>
-            </div>
-          </div>
+          <Item
+            selectProduct={(id) => selectHandler(id)}
+            changeQuantity={(e, id, value) => quantityHandler(e, id, value)}
+            item={item}
+            key={item.id}
+          />
         ))}
       </section>
-
-      <section className="summary">
-        <strong>Order Details</strong>
-        <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1x Real Madrid</td>
-              <td>$ 119.99</td>
-            </tr>
-
-            <tr>
-              <th>Total</th>
-              <th>$ 119.99</th>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+      {itemsInBag.length > 0 && <OrderDetails itemsInBag={itemsInBag} />}
     </>
   );
 }
